@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title>Вход — SmakRoom</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-cake2-fill text-pink" style="font-size:2.5rem"></i>
+                        <h3 class="mt-2 fw-bold">Вход в SmakRoom</h3>
+                    </div>
+
+                    <div th:if="${errorMsg}" class="alert alert-danger py-2 small">
+                        <i class="bi bi-exclamation-triangle"></i> <span th:text="${errorMsg}"></span>
+                    </div>
+                    <div th:if="${successMsg}" class="alert alert-success py-2 small">
+                        <i class="bi bi-check-circle"></i> <span th:text="${successMsg}"></span>
+                    </div>
+
+                    <form th:action="@{/auth/login}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Имя пользователя</label>
+                            <input type="text" name="username" class="form-control"
+                                   placeholder="Введите логин" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Пароль</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="loginPassword"
+                                       class="form-control" placeholder="Введите пароль" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="remember-me" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                        </div>
+                        <button type="submit" class="btn btn-pink w-100 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </button>
+                    </form>
+
+                    <hr>
+                    <p class="text-center mb-0 small text-muted">
+                        Нет аккаунта?
+                        <a th:href="@{/auth/register}" class="text-pink fw-semibold">Зарегистрироваться</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script>
+$(function(){
+    $('#togglePassword').on('click', function(){
+        var inp = $('#loginPassword');
+        var icon = $('#eyeIcon');
+        if(inp.attr('type') === 'password'){
+            inp.attr('type','text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            inp.attr('type','password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

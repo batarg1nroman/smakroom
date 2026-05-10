@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title>Корзина — SmakRoom</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-cart3"></i> Корзина</h2>
+
+    <div th:if="${cartItems.empty}" class="text-center py-5 text-muted">
+        <i class="bi bi-cart-x" style="font-size:4rem"></i>
+        <p class="mt-3 fs-5">Корзина пуста</p>
+        <a th:href="@{/catalog}" class="btn btn-pink mt-2">Перейти в каталог</a>
+    </div>
+
+    <div th:unless="${cartItems.empty}" class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div th:each="item : ${cartItems}" class="cart-item d-flex align-items-center gap-3 p-3 border-bottom"
+                         th:data-product-id="${item.productId}">
+                        <img th:src="${item.imageUrl != null ? item.imageUrl : '/img/placeholder.svg'}"
+                             class="rounded" style="width:70px;height:70px;object-fit:cover" th:alt="${item.productName}">
+                        <div class="flex-grow-1">
+                            <p class="fw-semibold mb-1" th:text="${item.productName}"></p>
+                            <small class="text-muted" th:text="${item.price} + ' ₽ / шт.'"></small>
+                        </div>
+                        <div class="input-group" style="width:110px">
+                            <button class="btn btn-sm btn-outline-secondary qty-minus" type="button">−</button>
+                            <input type="number" class="form-control form-control-sm text-center qty-input"
+                                   th:value="${item.quantity}" min="1" max="99">
+                            <button class="btn btn-sm btn-outline-secondary qty-plus" type="button">+</button>
+                        </div>
+                        <div class="text-end" style="min-width:80px">
+                            <span class="fw-bold item-subtotal"
+                                  th:text="${item.subtotal} + ' ₽'"></span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger remove-item" title="Удалить">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                    <button class="btn btn-outline-danger btn-sm" id="clearCart">
+                        <i class="bi bi-trash"></i> Очистить корзину
+                    </button>
+                    <a th:href="@{/catalog}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Продолжить покупки
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Итого</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Сумма заказа:</span>
+                        <span class="fw-bold" id="cartTotal" th:text="${total} + ' ₽'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Доставка:</span>
+                        <span class="text-success fw-semibold">Самовывоз (бесплатно)</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold">К оплате:</span>
+                        <span class="fw-bold fs-5 text-pink" id="cartTotalFinal" th:text="${total} + ' ₽'"></span>
+                    </div>
+                    <a th:href="@{/orders/checkout}" class="btn btn-pink w-100 fw-semibold">
+                        <i class="bi bi-bag-check"></i> Оформить заказ
+                    </a>
+                    <div class="mt-3 small text-muted text-center">
+                        <i class="bi bi-geo-alt-fill text-pink"></i>
+                        г. Казань, Проезд Яраткан 3А, подъезд 3
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script th:src="@{/js/cart.js}"></script>
+<script>
+$(function(){
+    var csrf = $('meta[name="_csrf"]').attr('content');
+    var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+    function cartAjax(url, data, onSuccess){
+        $.ajax({
+            url: url, method: 'POST', data: data,
+            beforeSend: function(xhr){ xhr.setRequestHeader(csrfHeader, csrf); },
+            success: onSuccess,
+            error: function(){ showToast('Ошибка обновления корзины', 'danger'); }
+        });
+    }
+
+    function updateCartUI(resp){
+        $('#cartTotal, #cartTotalFinal').text(resp.total + ' ₽');
+        updateCartBadge(resp.count);
+    }
+
+    // Quantity change
+    $(document).on('click', '.qty-minus', function(){
+        var row = $(this).closest('.cart-item');
+        var inp = row.find('.qty-input');
+        var val = Math.max(1, parseInt(inp.val()) - 1);
+        inp.val(val).trigger('change');
+    });
+    $(document).on('click', '.qty-plus', function(){
+        var row = $(this).closest('.cart-item');
+        var inp = row.find('.qty-input');
+        inp.val(parseInt(inp.val()) + 1).trigger('change');
+    });
+    $(document).on('change', '.qty-input', function(){
+        var row = $(this).closest('.cart-item');
+        var pid = row.data('product-id');
+        var qty = parseInt($(this).val());
+        cartAjax('/cart/update', {productId: pid, quantity: qty}, function(resp){
+            row.find('.item-subtotal').text(resp.itemTotal + ' ₽');
+            updateCartUI(resp);
+        });
+    });
+
+    // Remove item
+    $(document).on('click', '.remove-item', function(){
+        var row = $(this).closest('.cart-item');
+        var pid = row.data('product-id');
+        cartAjax('/cart/remove', {productId: pid}, function(resp){
+            row.fadeOut(300, function(){ $(this).remove(); });
+            updateCartUI(resp);
+            if(resp.count === 0) location.reload();
+        });
+    });
+
+    // Clear cart
+    $('#clearCart').on('click', function(){
+        if(!confirm('Очистить корзину?')) return;
+        cartAjax('/cart/clear', {}, function(){ location.reload(); });
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

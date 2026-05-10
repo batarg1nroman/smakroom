@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f5e6ea"/>
+  <text x="200" y="135" text-anchor="middle" font-size="60">🍰</text>
+  <text x="200" y="185" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#c94d65">SmakRoom</text>
+</svg>

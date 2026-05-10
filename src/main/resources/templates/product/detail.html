@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title th:text="${product.name} + ' — SmakRoom'">Продукт — SmakRoom</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Главная</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/catalog}">Каталог</a></li>
+            <li class="breadcrumb-item active" th:text="${product.name}"></li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Image -->
+        <div class="col-md-5">
+            <div class="product-detail-img-wrap rounded shadow-sm overflow-hidden">
+                <img th:src="${product.imageUrl != null ? product.imageUrl : '/img/placeholder.svg'}"
+                     class="img-fluid w-100" th:alt="${product.name}" style="max-height:420px;object-fit:cover">
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="col-md-7">
+            <span class="badge bg-light text-dark border mb-2"
+                  th:if="${product.category != null}" th:text="${product.category.name}"></span>
+            <h1 class="fw-bold mb-2" th:text="${product.name}">Название</h1>
+
+            <!-- Rating stars -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="stars" th:with="avg=${product.averageRating}">
+                    <span th:each="i : ${#numbers.sequence(1,5)}"
+                          th:class="${i <= avg} ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></span>
+                </div>
+                <small class="text-muted"
+                       th:text="'(' + ${reviews.totalElements} + ' отзывов)'"></small>
+            </div>
+
+            <div class="mb-3">
+                <span class="fs-2 fw-bold text-pink" id="mainPrice"
+                      th:data-rub="${product.price}"
+                      th:text="${product.price} + ' ₽'"></span>
+                <div class="mt-1" th:if="${rates != null}">
+                    <small class="text-muted">
+                        ≈ <span id="usdPrice" th:text="'$' + ${#numbers.formatDecimal(product.price / rates.usd, 1, 2)}"></span>
+                        &nbsp;/&nbsp;
+                        <span id="eurPrice" th:text="'€' + ${#numbers.formatDecimal(product.price / rates.eur, 1, 2)}"></span>
+                    </small>
+                    <small class="text-muted ms-2"
+                           th:text="'(курс ЦБ РФ от ' + ${rates.updatedAt} + ')'"></small>
+                </div>
+            </div>
+
+            <p class="text-muted mb-4" th:text="${product.description}"></p>
+
+            <!-- Availability -->
+            <div class="mb-3">
+                <span th:if="${product.available}" class="badge bg-success fs-6">
+                    <i class="bi bi-check-circle"></i> В наличии
+                </span>
+                <span th:unless="${product.available}" class="badge bg-secondary fs-6">
+                    Нет в наличии
+                </span>
+            </div>
+
+            <!-- Add to cart (auth only) -->
+            <div sec:authorize="isAuthenticated()">
+                <div class="d-flex align-items-center gap-3 mb-3" th:if="${product.available}">
+                    <div class="input-group" style="width:130px">
+                        <button class="btn btn-outline-secondary" id="qtyMinus" type="button">−</button>
+                        <input type="number" class="form-control text-center" id="qty" value="1" min="1" max="99">
+                        <button class="btn btn-outline-secondary" id="qtyPlus" type="button">+</button>
+                    </div>
+                    <button class="btn btn-pink btn-lg px-4 fw-semibold"
+                            id="addToCartBtn"
+                            th:data-product-id="${product.id}">
+                        <i class="bi bi-cart-plus"></i> В корзину
+                    </button>
+                </div>
+                <div id="cartFeedback" class="alert alert-success py-2 small d-none">
+                    <i class="bi bi-check-circle"></i> Добавлено в корзину!
+                </div>
+            </div>
+            <div sec:authorize="!isAuthenticated()" class="mb-3">
+                <a th:href="@{/auth/login}" class="btn btn-pink btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Войдите, чтобы купить
+                </a>
+            </div>
+
+            <!-- Pickup info -->
+            <div class="alert alert-light border mt-3">
+                <i class="bi bi-geo-alt-fill text-pink"></i>
+                <strong>Самовывоз:</strong> г. Казань, Проезд Яраткан 3А, подъезд 3
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <hr class="my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h3 class="fw-bold mb-4">Отзывы</h3>
+
+            <!-- Add review form (auth only, one per product) -->
+            <div sec:authorize="isAuthenticated()" th:if="${canReview}" class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Оставить отзыв</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Оценка</label>
+                        <div class="star-rating" id="starRating">
+                            <span th:each="i : ${#numbers.sequence(1,5)}"
+                                  class="star-btn bi bi-star fs-4 text-muted me-1"
+                                  th:data-val="${i}" style="cursor:pointer"></span>
+                        </div>
+                        <input type="hidden" id="ratingVal" value="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Комментарий</label>
+                        <textarea class="form-control" id="reviewComment" rows="3"
+                                  placeholder="Поделитесь впечатлениями..." maxlength="1000"></textarea>
+                    </div>
+                    <button class="btn btn-pink" id="submitReview"
+                            th:data-product-id="${product.id}">
+                        <i class="bi bi-send"></i> Отправить
+                    </button>
+                    <div id="reviewFeedback" class="mt-2 d-none"></div>
+                </div>
+            </div>
+
+            <!-- Reviews list -->
+            <div th:if="${reviews.empty}" class="text-muted py-3">
+                <i class="bi bi-chat-square-text"></i> Отзывов пока нет. Будьте первым!
+            </div>
+
+            <div th:each="review : ${reviews.content}" class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <strong th:text="${review.user.username}">user</strong>
+                            <div class="stars mt-1">
+                                <span th:each="i : ${#numbers.sequence(1,5)}"
+                                      th:class="${i <= review.rating} ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'"></span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted"
+                                   th:text="${#temporals.format(review.createdAt,'dd.MM.yyyy')}"></small>
+                            <button class="btn btn-sm btn-outline-danger delete-review"
+                                    th:data-review-id="${review.id}"
+                                    sec:authorize="isAuthenticated()"
+                                    th:if="${review.user.username == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="mb-0 text-muted" th:text="${review.comment}"></p>
+                </div>
+            </div>
+
+            <!-- Reviews pagination -->
+            <nav th:if="${reviews.totalPages > 1}">
+                <ul class="pagination pagination-sm">
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, reviews.totalPages - 1)}"
+                        th:classappend="${i == reviews.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/catalog/{id}(id=${product.id}, reviewPage=${i})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script th:src="@{/js/cart.js}"></script>
+<script>
+$(function(){
+    // Quantity controls
+    $('#qtyPlus').on('click', function(){ var v=parseInt($('#qty').val()); $('#qty').val(Math.min(v+1,99)); });
+    $('#qtyMinus').on('click', function(){ var v=parseInt($('#qty').val()); if(v>1) $('#qty').val(v-1); });
+
+    // Add to cart AJAX
+    $('#addToCartBtn').on('click', function(){
+        var productId = $(this).data('product-id');
+        var qty = parseInt($('#qty').val()) || 1;
+        addToCart(productId, qty, function(){
+            $('#cartFeedback').removeClass('d-none');
+            setTimeout(function(){ $('#cartFeedback').addClass('d-none'); }, 3000);
+        });
+    });
+
+    // Star rating
+    var selectedRating = 0;
+    $('.star-btn').on('mouseenter', function(){
+        var val = $(this).data('val');
+        $('.star-btn').each(function(){
+            var v = $(this).data('val');
+            $(this).toggleClass('bi-star-fill text-warning', v <= val)
+                   .toggleClass('bi-star text-muted', v > val);
+        });
+    }).on('mouseleave', function(){
+        updateStars(selectedRating);
+    }).on('click', function(){
+        selectedRating = $(this).data('val');
+        $('#ratingVal').val(selectedRating);
+        updateStars(selectedRating);
+    });
+
+    function updateStars(val){
+        $('.star-btn').each(function(){
+            var v = $(this).data('val');
+            $(this).toggleClass('bi-star-fill text-warning', v <= val)
+                   .toggleClass('bi-star text-muted', v > val);
+        });
+    }
+
+    // Submit review AJAX
+    $('#submitReview').on('click', function(){
+        var productId = $(this).data('product-id');
+        var rating = parseInt($('#ratingVal').val());
+        var comment = $('#reviewComment').val().trim();
+        var csrf = $('meta[name="_csrf"]').attr('content');
+        var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+
+        if(rating === 0){ alert('Пожалуйста, выберите оценку'); return; }
+
+        $.ajax({
+            url: '/api/reviews',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ productId: productId, rating: rating, comment: comment }),
+            beforeSend: function(xhr){ xhr.setRequestHeader(csrfHeader, csrf); },
+            success: function(){ location.reload(); },
+            error: function(xhr){
+                var msg = xhr.responseJSON ? xhr.responseJSON.error : 'Ошибка';
+                $('#reviewFeedback').removeClass('d-none alert-success')
+                    .addClass('alert alert-danger').text(msg);
+            }
+        });
+    });
+
+    // Delete review AJAX
+    $('.delete-review').on('click', function(){
+        if(!confirm('Удалить отзыв?')) return;
+        var reviewId = $(this).data('review-id');
+        var csrf = $('meta[name="_csrf"]').attr('content');
+        var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+        $.ajax({
+            url: '/api/reviews/' + reviewId,
+            method: 'DELETE',
+            beforeSend: function(xhr){ xhr.setRequestHeader(csrfHeader, csrf); },
+            success: function(){ location.reload(); },
+            error: function(xhr){ alert('Ошибка удаления'); }
+        });
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title>Пользователи — Админ — SmakRoom</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0"><i class="bi bi-people-fill text-pink"></i> Пользователи</h2>
+        <a th:href="@{/admin}" class="btn btn-outline-secondary btn-sm">← Дашборд</a>
+    </div>
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th><th>Логин</th><th>Email</th><th>Роль</th>
+                        <th>Дата рег.</th><th>Статус</th><th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.id}"></td>
+                        <td class="fw-semibold" th:text="${u.username}"></td>
+                        <td th:text="${u.email}"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${u.role.name() == 'ADMIN'} ? 'bg-danger' : 'bg-secondary'"
+                                  th:text="${u.role.name() == 'ADMIN'} ? 'Админ' : 'Пользователь'"></span>
+                        </td>
+                        <td th:text="${#temporals.format(u.createdAt,'dd.MM.yyyy')}"></td>
+                        <td>
+                            <span th:if="${u.enabled}" class="badge bg-success">Активен</span>
+                            <span th:unless="${u.enabled}" class="badge bg-secondary">Заблокирован</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm toggle-user"
+                                    th:classappend="${u.enabled} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                    th:data-user-id="${u.id}"
+                                    th:text="${u.enabled} ? 'Блок.' : 'Разблок.'"
+                                    th:if="${u.role.name() != 'ADMIN'}">
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script>
+$(function(){
+    var csrf = $('meta[name="_csrf"]').attr('content');
+    var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    $('.toggle-user').on('click', function(){
+        var btn = $(this);
+        var userId = btn.data('user-id');
+        $.ajax({
+            url: '/admin/users/' + userId + '/toggle', method: 'POST',
+            beforeSend: function(xhr){ xhr.setRequestHeader(csrfHeader, csrf); },
+            success: function(){ location.reload(); },
+            error: function(){ alert('Ошибка'); }
+        });
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

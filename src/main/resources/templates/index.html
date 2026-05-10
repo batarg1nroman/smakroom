@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title>SmakRoom — Домашняя кондитерская</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+
+    <!-- Hero -->
+    <section class="hero-section text-white text-center py-5">
+        <div class="container py-4">
+            <h1 class="display-4 fw-bold mb-3">Сладкое с любовью 🍰</h1>
+            <p class="lead mb-4">Домашняя кондитерская SmakRoom — торты, пирожные, зефир ручной работы</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a th:href="@{/catalog}" class="btn btn-light btn-lg px-4 fw-semibold">
+                    <i class="bi bi-grid"></i> Смотреть каталог
+                </a>
+                <a href="#pickup" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-geo-alt"></i> Самовывоз
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-4 section-title">Категории</h2>
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-md-4 col-lg-2" th:each="cat : ${categories}">
+                    <a th:href="@{/catalog(categoryId=${cat.id})}"
+                       class="card category-card text-center text-decoration-none h-100 border-0 shadow-sm">
+                        <div class="card-body py-3">
+                            <div class="category-icon mb-2">🍰</div>
+                            <p class="fw-semibold mb-0 small" th:text="${cat.name}">Торты</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title mb-0">Популярное</h2>
+                <a th:href="@{/catalog}" class="btn btn-outline-pink btn-sm">Все товары →</a>
+            </div>
+            <div class="row g-4">
+                <div class="col-6 col-md-4 col-lg-3" th:each="product : ${featuredProducts}">
+                    <div class="card product-card h-100 border-0 shadow-sm">
+                        <div class="product-img-wrap">
+                            <img th:src="${product.imageUrl != null ? product.imageUrl : '/img/placeholder.svg'}"
+                                 class="card-img-top product-img" th:alt="${product.name}">
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title fw-semibold" th:text="${product.name}">Название</h6>
+                            <p class="text-muted small flex-grow-1 mb-2"
+                               th:text="${#strings.abbreviate(product.description, 60)}">Описание</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-pink" th:text="${product.price} + ' ₽'">0 ₽</span>
+                                <div class="d-flex gap-1">
+                                    <a th:href="@{/catalog/{id}(id=${product.id})}"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-pink add-to-cart"
+                                            th:data-product-id="${product.id}"
+                                            sec:authorize="isAuthenticated()">
+                                        <i class="bi bi-cart-plus"></i>
+                                    </button>
+                                    <a th:href="@{/catalog/{id}(id=${product.id})}"
+                                       class="btn btn-sm btn-pink"
+                                       sec:authorize="!isAuthenticated()">
+                                        <i class="bi bi-cart-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pickup info -->
+    <section id="pickup" class="py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-md-6">
+                    <h2 class="section-title">Самовывоз</h2>
+                    <p class="lead">Заберите заказ по адресу:</p>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <i class="bi bi-geo-alt-fill text-pink fs-3 mt-1"></i>
+                        <div>
+                            <p class="fw-semibold mb-0">г. Казань, Проезд Яраткан 3А</p>
+                            <p class="text-muted mb-0">подъезд 3</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <i class="bi bi-clock-fill text-pink fs-3"></i>
+                        <div>
+                            <p class="fw-semibold mb-0">Пн–Вс: 10:00–20:00</p>
+                            <p class="text-muted mb-0">Без выходных</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-info-circle-fill text-pink fs-3"></i>
+                        <p class="mb-0 text-muted">После оформления заказа мы свяжемся с вами для уточнения времени</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-4 text-center">
+                        <i class="bi bi-bag-heart-fill text-pink" style="font-size:4rem"></i>
+                        <h4 class="mt-3">Как заказать?</h4>
+                        <ol class="text-start text-muted mt-2 ps-3">
+                            <li class="mb-1">Выберите товары в каталоге</li>
+                            <li class="mb-1">Добавьте в корзину и оформите заказ</li>
+                            <li class="mb-1">Мы подготовим к указанному времени</li>
+                            <li>Заберите самовывозом</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+<th:block th:fragment="scripts">
+<script th:src="@{/js/cart.js}"></script>
+</th:block>
+</body>
+</html>

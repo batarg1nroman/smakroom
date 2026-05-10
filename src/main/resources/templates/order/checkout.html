@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title>Оформление заказа — SmakRoom</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-bag-check"></i> Оформление заказа</h2>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <!-- Order summary -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent fw-bold">Ваш заказ</div>
+                <div class="card-body p-0">
+                    <div th:each="item : ${cartItems}"
+                         class="d-flex align-items-center gap-3 p-3 border-bottom">
+                        <img th:src="${item.imageUrl != null ? item.imageUrl : '/img/placeholder.svg'}"
+                             class="rounded" style="width:55px;height:55px;object-fit:cover" th:alt="${item.productName}">
+                        <div class="flex-grow-1">
+                            <p class="mb-0 fw-semibold" th:text="${item.productName}"></p>
+                            <small class="text-muted"
+                                   th:text="${item.quantity} + ' × ' + ${item.price} + ' ₽'"></small>
+                        </div>
+                        <span class="fw-bold" th:text="${item.subtotal} + ' ₽'"></span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between fw-bold">
+                    <span>Итого:</span>
+                    <span class="text-pink fs-5" th:text="${total} + ' ₽'"></span>
+                </div>
+            </div>
+
+            <!-- Checkout form — PRG pattern prevents double submit -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Комментарий к заказу</h5>
+                    <form th:action="@{/orders/checkout}" method="post"
+                          th:object="${checkoutDto}" id="checkoutForm">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                        <div th:if="${errorMsg}" class="alert alert-danger py-2 small">
+                            <i class="bi bi-exclamation-triangle"></i> <span th:text="${errorMsg}"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Пожелания или уточнения (необязательно)</label>
+                            <textarea th:field="*{notes}" class="form-control" rows="3"
+                                      th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"
+                                      placeholder="Например: без орехов, нужно к 15:00..."></textarea>
+                            <div class="invalid-feedback" th:errors="*{notes}"></div>
+                        </div>
+
+                        <div class="alert alert-info py-2 small">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <strong>Самовывоз:</strong> г. Казань, Проезд Яраткан 3А, подъезд 3
+                            <br>После оформления мы свяжемся с вами для уточнения времени готовности.
+                        </div>
+
+                        <button type="submit" class="btn btn-pink w-100 fw-semibold btn-lg"
+                                id="submitOrderBtn">
+                            <i class="bi bi-check-lg"></i> Подтвердить заказ
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold"><i class="bi bi-info-circle text-pink"></i> Как это работает</h5>
+                    <ol class="ps-3 text-muted mt-3">
+                        <li class="mb-2">Подтвердите заказ на этой странице</li>
+                        <li class="mb-2">Мы получим заявку и свяжемся с вами</li>
+                        <li class="mb-2">Вам сообщат точное время готовности</li>
+                        <li>Заберите заказ по адресу самовывоза</li>
+                    </ol>
+                    <hr>
+                    <p class="mb-1 small"><i class="bi bi-clock text-pink"></i> <strong>Режим работы:</strong> Пн–Вс 10:00–20:00</p>
+                    <p class="mb-0 small"><i class="bi bi-geo-alt text-pink"></i> <strong>Адрес:</strong> Проезд Яраткан 3А, подъезд 3</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script>
+// Prevent double submit
+$(function(){
+    $('#checkoutForm').on('submit', function(){
+        var btn = $('#submitOrderBtn');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Оформляем...');
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

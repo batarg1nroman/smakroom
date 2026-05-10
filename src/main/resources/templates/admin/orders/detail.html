@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main}, ~{::head-extra}, ~{::scripts})}">
+<head>
+    <title th:text="'Заказ #' + ${order.id} + ' — Админ'">Заказ</title>
+    <th:block th:fragment="head-extra"></th:block>
+</head>
+<body>
+<main th:fragment="main">
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Админ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/orders}">Заказы</a></li>
+            <li class="breadcrumb-item active" th:text="'#' + ${order.id}"></li>
+        </ol>
+    </nav>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent d-flex justify-content-between">
+                    <h5 class="fw-bold mb-0" th:text="'Заказ #' + ${order.id}"></h5>
+                    <span class="badge fs-6"
+                          th:classappend="${order.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                         (${order.status.name() == 'COMPLETED'} ? 'bg-secondary' :
+                                         (${order.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-success'))"
+                          th:text="${order.status.displayName}"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:each="item : ${order.items}" class="d-flex align-items-center gap-3 p-3 border-bottom">
+                        <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : '/img/placeholder.svg'}"
+                             class="rounded" style="width:55px;height:55px;object-fit:cover">
+                        <div class="flex-grow-1">
+                            <p class="fw-semibold mb-0" th:text="${item.product.name}"></p>
+                            <small class="text-muted" th:text="${item.quantity} + ' × ' + ${item.price} + ' ₽'"></small>
+                        </div>
+                        <span class="fw-bold" th:text="${item.subtotal} + ' ₽'"></span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between fw-bold fs-5">
+                    <span>Итого:</span>
+                    <span class="text-pink" th:text="${order.totalPrice} + ' ₽'"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Покупатель</h6>
+                    <p class="mb-1"><strong th:text="${order.user.username}"></strong></p>
+                    <p class="mb-1 small text-muted" th:text="${order.user.email}"></p>
+                    <p class="mb-0 small text-muted"
+                       th:text="${#temporals.format(order.createdAt,'dd.MM.yyyy HH:mm')}"></p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-3" th:if="${order.notes != null and !order.notes.isBlank()}">
+                <div class="card-body">
+                    <h6 class="fw-bold">Комментарий</h6>
+                    <p class="mb-0 text-muted small" th:text="${order.notes}"></p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Изменить статус</h6>
+                    <select class="form-select mb-2" id="statusSelect">
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.displayName}"
+                                th:selected="${s == order.status}"></option>
+                    </select>
+                    <button class="btn btn-pink w-100" id="updateStatusBtn"
+                            th:data-order-id="${order.id}">
+                        <i class="bi bi-check-lg"></i> Обновить статус
+                    </button>
+                    <div id="statusFeedback" class="mt-2 d-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<th:block th:fragment="scripts">
+<script>
+$(function(){
+    var csrf = $('meta[name="_csrf"]').attr('content');
+    var csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    $('#updateStatusBtn').on('click', function(){
+        var orderId = $(this).data('order-id');
+        var status = $('#statusSelect').val();
+        $.ajax({
+            url: '/admin/orders/' + orderId + '/status',
+            method: 'POST', data: { status: status },
+            beforeSend: function(xhr){ xhr.setRequestHeader(csrfHeader, csrf); },
+            success: function(resp){
+                $('#statusFeedback').removeClass('d-none alert-danger')
+                    .addClass('alert alert-success py-2 small')
+                    .text('Статус обновлён: ' + resp.statusDisplay);
+            },
+            error: function(xhr){
+                $('#statusFeedback').removeClass('d-none alert-success')
+                    .addClass('alert alert-danger py-2 small')
+                    .text(xhr.responseJSON ? xhr.responseJSON.error : 'Ошибка');
+            }
+        });
+    });
+});
+</script>
+</th:block>
+</body>
+</html>

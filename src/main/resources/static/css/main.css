@@ -1,0 +1,151 @@
+/* =============================================
+   SmakRoom — Main Stylesheet
+   ============================================= */
+
+:root {
+    --pink: #e8637a;
+    --pink-dark: #c94d65;
+    --pink-light: #fde8ec;
+    --cream: #fff9f5;
+    --brown: #5c3d2e;
+}
+
+/* ---- Base ---- */
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--cream);
+    color: #333;
+}
+
+a { color: var(--pink); }
+a:hover { color: var(--pink-dark); }
+
+/* ---- Color utilities ---- */
+.text-pink  { color: var(--pink) !important; }
+.bg-pink    { background-color: var(--pink) !important; }
+
+.btn-pink {
+    background-color: var(--pink);
+    border-color: var(--pink);
+    color: #fff;
+}
+.btn-pink:hover, .btn-pink:focus {
+    background-color: var(--pink-dark);
+    border-color: var(--pink-dark);
+    color: #fff;
+}
+.btn-outline-pink {
+    border-color: var(--pink);
+    color: var(--pink);
+}
+.btn-outline-pink:hover {
+    background-color: var(--pink);
+    color: #fff;
+}
+
+/* ---- Navbar ---- */
+.navbar { box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.navbar-brand { letter-spacing: .5px; }
+
+/* ---- Hero ---- */
+.hero-section {
+    background: linear-gradient(135deg, #c94d65 0%, #e8a0ab 50%, #f7c5cc 100%);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+/* ---- Section titles ---- */
+.section-title {
+    font-weight: 700;
+    position: relative;
+    padding-bottom: .5rem;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 48px;
+    height: 3px;
+    background: var(--pink);
+    border-radius: 2px;
+}
+
+/* ---- Product cards ---- */
+.product-card {
+    border-radius: 12px;
+    transition: transform .2s ease, box-shadow .2s ease;
+    overflow: hidden;
+}
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(232,99,122,.18) !important;
+}
+
+.product-img-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 200px;
+    background: #f5f5f5;
+}
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s ease;
+}
+.product-card:hover .product-img { transform: scale(1.05); }
+
+/* ---- Category cards ---- */
+.category-card {
+    border-radius: 12px;
+    transition: all .2s ease;
+    background: #fff;
+}
+.category-card:hover {
+    transform: translateY(-3px);
+    background: var(--pink-light) !important;
+    box-shadow: 0 6px 16px rgba(232,99,122,.15) !important;
+}
+.category-icon { font-size: 2rem; }
+
+/* ---- Cart badge ---- */
+#cartBadge { font-size: .65rem; min-width: 18px; }
+
+/* ---- Stars ---- */
+.stars { display: inline-flex; gap: 2px; }
+.star-btn { transition: color .15s; }
+
+/* ---- Admin sidebar highlight ---- */
+.admin-nav .nav-link.active {
+    background: var(--pink-light);
+    color: var(--pink);
+    border-radius: 8px;
+}
+
+/* ---- Cards ---- */
+.card { border-radius: 12px; }
+.card-header { border-radius: 12px 12px 0 0 !important; }
+
+/* ---- Footer ---- */
+.footer { border-top: 1px solid rgba(255,255,255,.08); }
+
+/* ---- Forms ---- */
+.form-control:focus, .form-select:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 .2rem rgba(232,99,122,.2);
+}
+
+/* ---- Badges ---- */
+.badge { letter-spacing: .3px; }
+
+/* ---- Toast ---- */
+.toast { min-width: 280px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 576px) {
+    .hero-section { min-height: 280px; }
+    .hero-section h1 { font-size: 1.8rem; }
+    .product-img-wrap { height: 150px; }
+}
