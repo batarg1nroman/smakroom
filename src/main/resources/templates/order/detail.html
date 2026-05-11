@@ -7,8 +7,19 @@
 </head>
 <body>
 <main th:fragment="main">
+<div class="page-header mb-0">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" style="--bs-breadcrumb-divider-color:rgba(245,200,216,.5); font-size:.9rem">
+                <li class="breadcrumb-item"><a th:href="@{/orders/history}" style="color:var(--blush)">Мои заказы</a></li>
+                <li class="breadcrumb-item active" style="color:rgba(245,200,216,.7)" th:text="'Заказ #' + ${order.id}"></li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
 <div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-3">
+    <nav aria-label="breadcrumb" class="mb-3" style="display:none">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/orders/history}">Мои заказы</a></li>
             <li class="breadcrumb-item active" th:text="'Заказ #' + ${order.id}"></li>

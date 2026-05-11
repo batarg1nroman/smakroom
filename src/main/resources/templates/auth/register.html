@@ -13,8 +13,9 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <i class="bi bi-person-plus-fill text-pink" style="font-size:2.5rem"></i>
-                        <h3 class="mt-2 fw-bold">Регистрация</h3>
+                        <img th:src="@{/img/logo.png}" class="auth-logo mb-3 d-block mx-auto"
+                             alt="SmakRoom" onerror="this.style.display='none'">
+                        <h4 class="fw-bold" style="color:var(--crimson)">Регистрация</h4>
                     </div>
 
                     <form th:action="@{/auth/register}" method="post" th:object="${registerDto}" novalidate>

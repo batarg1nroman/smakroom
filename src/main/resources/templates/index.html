@@ -10,30 +10,35 @@
 <main th:fragment="main">
 
     <!-- Hero -->
-    <section class="hero-section text-white text-center py-5">
+    <section class="hero-section text-center py-5">
         <div class="container py-4">
-            <h1 class="display-4 fw-bold mb-3">Сладкое с любовью 🍰</h1>
-            <p class="lead mb-4">Домашняя кондитерская SmakRoom — торты, пирожные, зефир ручной работы</p>
+            <img th:src="@{/img/logo.png}" class="hero-logo mb-4 d-block mx-auto"
+                 alt="SmakRoom" onerror="this.style.display='none'">
+            <h1 class="display-5 fw-bold mb-3">Сладкое с любовью</h1>
+            <p class="lead mb-4 mx-auto" style="max-width:480px">
+                Торты, пирожные и зефир ручной работы — только натуральные ингредиенты
+            </p>
             <div class="d-flex gap-3 justify-content-center flex-wrap">
-                <a th:href="@{/catalog}" class="btn btn-light btn-lg px-4 fw-semibold">
-                    <i class="bi bi-grid"></i> Смотреть каталог
+                <a th:href="@{/catalog}" class="btn btn-light btn-lg px-5 fw-semibold rounded-pill"
+                   style="color:var(--crimson)">
+                    Каталог
                 </a>
-                <a href="#pickup" class="btn btn-outline-light btn-lg px-4">
-                    <i class="bi bi-geo-alt"></i> Самовывоз
+                <a href="#pickup" class="btn btn-outline-light btn-lg px-5 rounded-pill">
+                    Самовывоз
                 </a>
             </div>
         </div>
     </section>
 
     <!-- Categories -->
-    <section class="py-5 bg-light">
+    <section class="py-5" style="background:var(--white)">
         <div class="container">
-            <h2 class="text-center mb-4 section-title">Категории</h2>
+            <h2 class="text-center mb-5 section-title">Категории</h2>
             <div class="row g-3 justify-content-center">
                 <div class="col-6 col-md-4 col-lg-2" th:each="cat : ${categories}">
                     <a th:href="@{/catalog(categoryId=${cat.id})}"
-                       class="card category-card text-center text-decoration-none h-100 border-0 shadow-sm">
-                        <div class="card-body py-3">
+                       class="card category-card text-center text-decoration-none h-100 shadow-sm">
+                        <div class="card-body py-4">
                             <div class="category-icon mb-2">🍰</div>
                             <p class="fw-semibold mb-0 small" th:text="${cat.name}">Торты</p>
                         </div>
@@ -44,39 +49,39 @@
     </section>
 
     <!-- Featured Products -->
-    <section class="py-5">
+    <section class="py-5" style="background:var(--blush-light)">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-5">
                 <h2 class="section-title mb-0">Популярное</h2>
-                <a th:href="@{/catalog}" class="btn btn-outline-pink btn-sm">Все товары →</a>
+                <a th:href="@{/catalog}" class="btn btn-outline-pink btn-sm px-4 rounded-pill">Все товары →</a>
             </div>
             <div class="row g-4">
                 <div class="col-6 col-md-4 col-lg-3" th:each="product : ${featuredProducts}">
-                    <div class="card product-card h-100 border-0 shadow-sm">
+                    <div class="card product-card h-100 shadow-sm">
                         <div class="product-img-wrap">
                             <img th:src="${product.imageUrl != null ? product.imageUrl : '/img/placeholder.svg'}"
                                  class="card-img-top product-img" th:alt="${product.name}">
                         </div>
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="card-title fw-semibold" th:text="${product.name}">Название</h6>
-                            <p class="text-muted small flex-grow-1 mb-2"
+                        <div class="card-body d-flex flex-column px-3 py-3">
+                            <h6 class="card-title fw-semibold mb-1" th:text="${product.name}">Название</h6>
+                            <p class="small flex-grow-1 mb-2" style="color:var(--text-muted)"
                                th:text="${#strings.abbreviate(product.description, 60)}">Описание</p>
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <span class="fw-bold text-pink" th:text="${product.price} + ' ₽'">0 ₽</span>
                                 <div class="d-flex gap-1">
                                     <a th:href="@{/catalog/{id}(id=${product.id})}"
-                                       class="btn btn-sm btn-outline-secondary">
+                                       class="btn btn-sm btn-outline-pink rounded-pill px-2">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-pink add-to-cart"
+                                    <button class="btn btn-sm btn-pink rounded-pill px-2 add-to-cart"
                                             th:data-product-id="${product.id}"
                                             sec:authorize="isAuthenticated()">
-                                        <i class="bi bi-cart-plus"></i>
+                                        <i class="bi bi-bag-plus"></i>
                                     </button>
                                     <a th:href="@{/catalog/{id}(id=${product.id})}"
-                                       class="btn btn-sm btn-pink"
+                                       class="btn btn-sm btn-pink rounded-pill px-2"
                                        sec:authorize="!isAuthenticated()">
-                                        <i class="bi bi-cart-plus"></i>
+                                        <i class="bi bi-bag-plus"></i>
                                     </a>
                                 </div>
                             </div>
@@ -88,39 +93,42 @@
     </section>
 
     <!-- Pickup info -->
-    <section id="pickup" class="py-5 bg-light">
+    <section id="pickup" class="py-5" style="background:var(--white)">
         <div class="container">
-            <div class="row align-items-center g-4">
+            <div class="row align-items-center g-5">
                 <div class="col-md-6">
-                    <h2 class="section-title">Самовывоз</h2>
-                    <p class="lead">Заберите заказ по адресу:</p>
-                    <div class="d-flex align-items-start gap-3 mb-3">
+                    <h2 class="section-title mb-4">Самовывоз</h2>
+                    <div class="d-flex align-items-start gap-3 mb-4">
                         <i class="bi bi-geo-alt-fill text-pink fs-3 mt-1"></i>
                         <div>
                             <p class="fw-semibold mb-0">г. Казань, Проезд Яраткан 3А</p>
-                            <p class="text-muted mb-0">подъезд 3</p>
+                            <p class="mb-0" style="color:var(--text-muted)">подъезд 3</p>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 mb-4">
                         <i class="bi bi-clock-fill text-pink fs-3"></i>
                         <div>
                             <p class="fw-semibold mb-0">Пн–Вс: 10:00–20:00</p>
-                            <p class="text-muted mb-0">Без выходных</p>
+                            <p class="mb-0" style="color:var(--text-muted)">Без выходных</p>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-info-circle-fill text-pink fs-3"></i>
-                        <p class="mb-0 text-muted">После оформления заказа мы свяжемся с вами для уточнения времени</p>
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-info-circle-fill text-pink fs-3 mt-1"></i>
+                        <p class="mb-0" style="color:var(--text-muted)">
+                            После оформления заказа мы свяжемся с вами для уточнения времени
+                        </p>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card border-0 shadow-sm p-4 text-center">
-                        <i class="bi bi-bag-heart-fill text-pink" style="font-size:4rem"></i>
-                        <h4 class="mt-3">Как заказать?</h4>
-                        <ol class="text-start text-muted mt-2 ps-3">
-                            <li class="mb-1">Выберите товары в каталоге</li>
-                            <li class="mb-1">Добавьте в корзину и оформите заказ</li>
-                            <li class="mb-1">Мы подготовим к указанному времени</li>
+                    <div class="card border-0 shadow-sm p-4" style="border-radius:16px; background:var(--blush-light)">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-bag-heart-fill text-pink" style="font-size:3rem"></i>
+                        </div>
+                        <h5 class="text-center fw-bold mb-3" style="color:var(--crimson)">Как заказать?</h5>
+                        <ol class="mb-0 ps-4" style="color:var(--text-muted)">
+                            <li class="mb-2">Выберите товары в каталоге</li>
+                            <li class="mb-2">Добавьте в корзину и оформите заказ</li>
+                            <li class="mb-2">Мы подготовим к указанному времени</li>
                             <li>Заберите самовывозом</li>
                         </ol>
                     </div>
@@ -131,7 +139,7 @@
 
 </main>
 <th:block th:fragment="scripts">
-<script th:src="@{/js/cart.js}"></script>
+    <script th:src="@{/js/cart.js}"></script>
 </th:block>
 </body>
 </html>

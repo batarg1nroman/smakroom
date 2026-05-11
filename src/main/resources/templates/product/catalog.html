@@ -8,9 +8,13 @@
 </head>
 <body>
 <main th:fragment="main">
-<div class="container py-4">
+<div class="page-header mb-0">
+    <div class="container">
+        <h2 class="mb-0">Каталог</h2>
+    </div>
+</div>
 
-    <h2 class="fw-bold mb-4">Каталог</h2>
+<div class="container py-4">
 
     <!-- Filters row -->
     <form th:action="@{/catalog}" method="get" class="row g-2 mb-4 align-items-end" id="filterForm">
