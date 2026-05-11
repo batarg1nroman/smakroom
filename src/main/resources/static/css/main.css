@@ -3,7 +3,7 @@
    Palette: crimson #8B1A4A · blush #F5C8D8 · cream #FDF0F4
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fredoka+One&display=swap');
 
 :root {
     --crimson:       #8B1A4A;
@@ -81,16 +81,12 @@ a:hover { color: var(--crimson-dark); }
     gap: 10px;
     padding: 0;
 }
-.navbar-brand .brand-logo {
-    height: 42px;
-    width: auto;
-    object-fit: contain;
-}
 .navbar-brand .brand-text {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    font-weight: 400;
     color: var(--blush) !important;
-    letter-spacing: .04em;
+    letter-spacing: .02em;
     line-height: 1;
 }
 .navbar .nav-link {
@@ -155,10 +151,13 @@ a:hover { color: var(--crimson-dark); }
     color: rgba(245,200,216,.8);
     font-size: 1.1rem;
 }
-.hero-logo {
-    height: 120px;
-    width: auto;
-    filter: drop-shadow(0 4px 24px rgba(0,0,0,.3));
+.hero-brand-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 5rem;
+    color: var(--blush);
+    letter-spacing: .02em;
+    line-height: 1;
+    text-shadow: 0 4px 24px rgba(0,0,0,.25);
 }
 
 /* ---- Section titles ---- */
@@ -273,10 +272,11 @@ a:hover { color: var(--crimson-dark); }
     font-weight: 600;
 }
 .footer .text-muted { color: rgba(245,200,216,.6) !important; }
-.footer .footer-logo {
-    height: 48px;
-    width: auto;
-    opacity: .95;
+.footer-brand-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    color: var(--blush);
+    line-height: 1;
 }
 
 /* ---- Forms ---- */
